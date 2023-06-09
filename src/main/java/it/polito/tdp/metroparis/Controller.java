@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.metroparis.model.BilancioFermata;
 import it.polito.tdp.metroparis.model.Fermata;
 import it.polito.tdp.metroparis.model.Model;
 import javafx.event.ActionEvent;
@@ -35,17 +36,24 @@ public class Controller {
     	Fermata partenza = this.boxPartenza.getValue();
     	Fermata arrivo = this.boxArrivo.getValue();
     	
-    	if(partenza != null && arrivo !=null && !partenza.equals(arrivo)) {
-    		List<Fermata>percorso = model.percorso(partenza, arrivo);
-    		txtResult.setText("Percorso tra "+ partenza.getNome()+" e "+ arrivo.getNome()+"\n\n");
-    		for(Fermata f : percorso) {
-    			this.txtResult.appendText(f.getNome()+"\n");
+    	if(partenza != null) {
+    		if(arrivo !=null && !partenza.equals(arrivo)) {
+    			List<Fermata>percorso = model.percorso(partenza, arrivo);
+    			txtResult.setText("Percorso tra "+ partenza.getNome()+" e "+ arrivo.getNome()+"\n\n");
+    			for(Fermata f : percorso) {
+    				this.txtResult.appendText(f.getNome()+"\n");
+    			}
+    		} else if(partenza.equals(arrivo)){
+    			this.txtResult.setText("Devi selezionare due stazioni diverse tra loro!");
+    			return;
+    		}else if (arrivo == null) {
+    			List<BilancioFermata>successori = model.successoriDiFermata(partenza);
+    			this.txtResult.setText("I successori di "+partenza.getNome() + " sono : \n");
+    			for(BilancioFermata x : successori) {
+    				this.txtResult.appendText(x.toString() + "\n");
+    			}
     		}
-    	} else {
-    		this.txtResult.setText("Devi selezionare due stazioni diverse tra loro!");
-    		return;
     	}
-    	
     	
     }
 
@@ -53,7 +61,9 @@ public class Controller {
     void handleCrea(ActionEvent event) {
     	this.model.creaGrafo();
     	if(this.model.isGrafoLoaded()) {
-    		this.txtResult.setText("Grafo correttamente importato \n");
+    		this.txtResult.setText("Grafo correttamente importato con : "+model.getGrafo().vertexSet().size()+" vertici e "+model.getGrafo().edgeSet().size()+" archi \n");
+    		int connesse = model.getNumberOfConnectedComponents();
+    		this.txtResult.appendText("Numero componenti connesse : " + connesse);
     	}
     }
 
